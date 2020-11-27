@@ -15,7 +15,7 @@ import { ServiceWorkerModule } from '@angular/service-worker';
 import { environment } from '../environments/environment'
 
 const ROUTES: Routes = [
-  { path: "list", component: HomeComponent },
+  { path: "", component: HomeComponent },
   { path: "home", component: HomeComponent },
   { path: "list", component: ListComponent },
   { path: "setting", component: SettingComponent },
