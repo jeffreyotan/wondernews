@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from "@angular/core";
 import Dexie from "dexie";
-import { ApikeyStore, CountryDetails } from './models';
+import { ApikeyStore, CountryDetails, NewsArticle } from './models';
 import { WebServices } from './web.service';
 
 @Injectable()
@@ -11,6 +11,7 @@ export class NewsDatabase extends Dexie {
     private countries: Dexie.Table<CountryDetails, string>;
 
     countrySrvUrl: string = "https://restcountries.eu/rest/v2/alpha";
+    newsApiUrl: string = "https://newsapi.org/v2/top-headlines";
 
     constructor(private http: HttpClient) {
         super('newsDB');
@@ -78,7 +79,38 @@ export class NewsDatabase extends Dexie {
         return retVal;
     }
 
-    async addCountryDetail(country: CountryDetails) {
-        return this.countries.put(country, country.code);
+    async getHeadlines(country: string) {
+        const headline: NewsArticle[] = [];
+
+        const queryString = this.newsApiUrl + await this.createQuery(country);
+        console.info("=> getHeadline0: ", queryString);
+        const result = await this.http.get(queryString).toPromise();
+        console.info("=> getHeadline1: ", result);
+        if(result['status'] === "ok") {
+            const articleArray = result['articles'];
+            for(let i=0; i<articleArray.length; i++) {
+                const newArticle: NewsArticle = {
+                    sourceName: articleArray[i]['source']['name'],
+                    author: articleArray[i]['author'],
+                    title: articleArray[i]['title'],
+                    description: articleArray[i]['description'],
+                    articleUrl: articleArray[i]['url'],
+                    imageUrl: articleArray[i]['urlToImage'],
+                    pubTime: articleArray[i]['publishedAt'],
+                    content: articleArray[i]['content']
+                };
+                headline.push(newArticle);
+            }
+        }
+
+        return headline;
     }
+
+    async createQuery(country: string) {
+        const apiKey = await this.getApiKey();
+        console.info("=> CreateQuery: ", apiKey[0]['apikey']);
+        const finalQuery = "?country=" + country.toLowerCase() + "&apiKey=" + apiKey[0]['apikey'];
+        return finalQuery;
+    }
+
 }

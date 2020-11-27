@@ -28,7 +28,7 @@ export class ListComponent implements OnInit {
   }
 
   async getCountryDetails() {
-    for(let i=1; i< this.countryCodes.length; i++) {
+    for(let i=0; i< this.countryCodes.length; i++) {
       const newDetail = await this.newsDB.getCountryDetail(this.countryCodes[i]);
       // console.info("=> ListComponent: ", newDetail);
       this.countryList.push(newDetail);

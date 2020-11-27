@@ -1,1 +1,22 @@
-<p>news works!</p>
+<div class="row">
+    <div class="col">
+        <h4>News from {{countryName}}</h4>
+    </div>
+    <div class="col" class="right-align">
+        <button type="button" class="btn btn-primary" (click)="onClickBack()">Back</button>
+    </div>
+</div>
+<hr>
+<div class="row" *ngFor="let a of countryHeadlines">
+    <div class="col-4">
+        <img [src]="a.imageUrl" alt="article image" style="width: 90%;">
+    </div>
+    <div class="col-8">
+        <h5>{{a.title}} - {{a.sourceName}}</h5>
+        <p>by {{a.author}} - published at {{a.pubTime}}</p>
+        <p>{{a.description}}</p>
+        <hr>
+        <p>{{a.content}}</p>
+        <a [href]="a.articleUrl" class="btn btn-primary" role="button" aria-pressed="true">Find Out More</a>
+    </div>
+</div>
