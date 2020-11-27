@@ -2,7 +2,16 @@
     <div class="col">
         <h4>Countries</h4>
     </div>
-    <div class="col align-right">
-        <button type="button" class="btn btn-primary">Settings</button>
+    <div class="col" class="align-right">
+        <button type="button" class="btn btn-primary" (click)="onClickSetting()">Settings</button>
+    </div>
+</div>
+<div class="row">
+    <div class="col">
+        <ul class="list-group">
+            <a *ngFor="let c of countryList" [routerLink]="['/news', c.code]" class="list-group-item list-group-item-action">
+                {{c.name}}-<img [src]="c.flagUrl" style="width: 40px;">
+            </a>
+        </ul>
     </div>
 </div>

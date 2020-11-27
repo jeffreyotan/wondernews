@@ -10,13 +10,15 @@ import { ListComponent } from './components/list.component';
 import { NewsComponent } from './components/news.component';
 import { HomeComponent } from './components/home.component';
 import { NewsDatabase } from './news.database';
+import { WebServices } from './web.service'
 
 const ROUTES: Routes = [
   { path: "", component: HomeComponent },
   { path: "home", component: HomeComponent },
   { path: "list", component: ListComponent },
   { path: "setting", component: SettingComponent },
-  { path: "news/:country", component: NewsComponent }
+  { path: "news/:country", component: NewsComponent },
+  { path: "**", redirectTo: "/", pathMatch: "full" }
 ];
 
 @NgModule({
@@ -35,7 +37,8 @@ const ROUTES: Routes = [
     HttpClientModule
   ],
   providers: [
-    NewsDatabase
+    NewsDatabase,
+    WebServices
   ],
   bootstrap: [AppComponent]
 })
