@@ -1,0 +1,22 @@
+<div class="row">
+    <div class="col">
+        <h4>Settings</h4>
+    </div>
+</div>
+<form [formGroup]="form">
+    <label for="">NewsAPI.org</label>
+    <br>
+    <input type="text" name="apikey" id="apikey" placeholder="API Key from newsapi.org" style="width: 100%;" formControlName="apikey">
+    <p *ngIf="form.invalid"><em>Please enter the API key from newsapi.org</em></p>
+    <p *ngIf="form.valid"></p>
+    <div class="row">
+        <div class="col">
+            <button type="button" class="btn btn-primary" (click)="onClickBack()">Back</button>
+            &nbsp;
+            <button type="button" class="btn btn-secondary" (click)="onClickDelete()" [disabled]="form.invalid">Delete</button>
+        </div>
+        <div class="col" class="align-right">
+            <button type="button" class="btn btn-secondary" (click)="onClickAdd()" [disabled]="form.invalid">Add</button>
+        </div>
+    </div>
+</form>
