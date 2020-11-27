@@ -14,13 +14,18 @@ export class HomeComponent implements OnInit {
   ngOnInit(): void {
     this.newsDB.getApiKey()
       .then(result => {
-        const apikey = result[0].apikey;
-        console.info("=> Home Key:", apikey);
-        if(apikey) {
-          this.router.navigate(['/list']);
+        if(result.length > 0) {
+          const apikey = result[0].apikey;
+          console.info("=> Home Key:", apikey);
+          if(apikey) {
+            this.router.navigate(['/list']);
+          } else {
+            this.router.navigate(['/setting']);
+          }
         } else {
           this.router.navigate(['/setting']);
         }
+        
       });
   }
 
