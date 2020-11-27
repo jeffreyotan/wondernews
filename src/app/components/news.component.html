@@ -7,7 +7,7 @@
     </div>
 </div>
 <hr>
-<div class="row" *ngFor="let a of countryHeadlines">
+<div class="row my-3" *ngFor="let a of countryHeadlines; let i = index">
     <div class="col-4">
         <img [src]="a.imageUrl" alt="article image" style="width: 90%;">
     </div>
@@ -18,5 +18,7 @@
         <hr>
         <p>{{a.content}}</p>
         <a [href]="a.articleUrl" class="btn btn-primary" role="button" aria-pressed="true">Find Out More</a>
+        &nbsp;|&nbsp;
+        <button type="button" (click)="onClickSave(i)" [disabled]=a.saved>Save</button><span *ngIf="a.saved">-Saved</span>
     </div>
 </div>

@@ -37,4 +37,8 @@ export class NewsComponent implements OnInit {
     this.router.navigate(['/list']);
   }
 
+  onClickSave(i: number) {
+    this.countryHeadlines[i].saved = true;
+  }
+
 }

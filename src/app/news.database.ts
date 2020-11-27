@@ -9,19 +9,24 @@ export class NewsDatabase extends Dexie {
 
     private apikey: Dexie.Table<ApikeyStore, number>;
     private countries: Dexie.Table<CountryDetails, string>;
+    private articles: Dexie.Table<NewsArticle, number>;
 
     countrySrvUrl: string = "https://restcountries.eu/rest/v2/alpha";
     newsApiUrl: string = "https://newsapi.org/v2/top-headlines";
 
+    globalTime: Date = new Date();
+    maxLapsedTime = 5*60*1000;
+
     constructor(private http: HttpClient) {
         super('newsDB');
-        this.version(2).stores({
+        this.version(3).stores({
             apiKey: '++id,apikey',
-            countryList: 'code'
-            // newsArticle: '++newId'
+            countryList: 'code',
+            newsArticle: '++newsId,country,saved'
         });
         this.apikey = this.table('apiKey');
         this.countries = this.table('countryList');
+        this.articles = this.table('newsArticle');
     }
 
     async getApiKey(): Promise<any> {
@@ -82,28 +87,81 @@ export class NewsDatabase extends Dexie {
     async getHeadlines(country: string) {
         const headline: NewsArticle[] = [];
 
-        const queryString = this.newsApiUrl + await this.createQuery(country);
-        console.info("=> getHeadline0: ", queryString);
-        const result = await this.http.get(queryString).toPromise();
-        console.info("=> getHeadline1: ", result);
-        if(result['status'] === "ok") {
-            const articleArray = result['articles'];
-            for(let i=0; i<articleArray.length; i++) {
-                const newArticle: NewsArticle = {
-                    sourceName: articleArray[i]['source']['name'],
-                    author: articleArray[i]['author'],
-                    title: articleArray[i]['title'],
-                    description: articleArray[i]['description'],
-                    articleUrl: articleArray[i]['url'],
-                    imageUrl: articleArray[i]['urlToImage'],
-                    pubTime: articleArray[i]['publishedAt'],
-                    content: articleArray[i]['content']
-                };
-                headline.push(newArticle);
+        const dbArticles = await this.articles.where('country').equals(country.toUpperCase()).toArray();
+        if(dbArticles.length <= 0) {
+            const queryString = this.newsApiUrl + await this.createQuery(country);
+            // console.info("=> getHeadline0: ", queryString);
+            const result = await this.http.get(queryString).toPromise();
+            // console.info("=> getHeadline1: ", result);
+            if(result['status'] === "ok") {
+                const currentTime = this.globalTime.getTime();
+                console.info("=> CacheTime0: ", currentTime);
+                const articleArray = result['articles'];
+                for(let i=0; i<articleArray.length; i++) {
+                    const newArticle: NewsArticle = {
+                        country: country,
+                        sourceName: articleArray[i]['source']['name'],
+                        author: articleArray[i]['author'],
+                        title: articleArray[i]['title'],
+                        description: articleArray[i]['description'],
+                        articleUrl: articleArray[i]['url'],
+                        imageUrl: articleArray[i]['urlToImage'],
+                        pubTime: articleArray[i]['publishedAt'],
+                        content: articleArray[i]['content'],
+                        saved: false,
+                        syncTime: currentTime
+                    };
+                    headline.push(newArticle);
+                }
+            }
+
+            this.storeHeadlines(headline);
+        } else { // there are articles in the db
+            const articleTime = dbArticles[0]['syncTime'];
+            if(this.globalTime.getTime() - articleTime > this.maxLapsedTime) {
+                this.removeHeadlines(country.toUpperCase());
+                const queryString = this.newsApiUrl + await this.createQuery(country);
+                // console.info("=> getHeadline0: ", queryString);
+                const result = await this.http.get(queryString).toPromise();
+                // console.info("=> getHeadline1: ", result);
+                if(result['status'] === "ok") {
+                    const currentTime = this.globalTime.getTime();
+                    console.info("=> CacheTime0: ", currentTime);
+                    const articleArray = result['articles'];
+                    for(let i=0; i<articleArray.length; i++) {
+                        const newArticle: NewsArticle = {
+                            country: country,
+                            sourceName: articleArray[i]['source']['name'],
+                            author: articleArray[i]['author'],
+                            title: articleArray[i]['title'],
+                            description: articleArray[i]['description'],
+                            articleUrl: articleArray[i]['url'],
+                            imageUrl: articleArray[i]['urlToImage'],
+                            pubTime: articleArray[i]['publishedAt'],
+                            content: articleArray[i]['content'],
+                            saved: false,
+                            syncTime: currentTime
+                        };
+                        headline.push(newArticle);
+                    }
+                }
+            } else {
+                for(let j=0; j<dbArticles.length; j++)
+                headline.push(dbArticles[j]);
             }
         }
 
         return headline;
+    }
+
+    async storeHeadlines(headline: NewsArticle[]) {
+        for(let i=0; i<headline.length; i++) {
+            this.articles.put(headline[i]);
+        }
+    }
+
+    async removeHeadlines(country: string) {
+        this.articles.where('country').equals(country).and(result => !(result.saved)).delete();
     }
 
     async createQuery(country: string) {

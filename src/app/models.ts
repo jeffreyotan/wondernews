@@ -9,6 +9,7 @@ export interface CountryDetails {
 }
 
 export interface NewsArticle {
+    country: string,
     sourceName: string,
     author: string,
     title: string,
@@ -16,5 +17,7 @@ export interface NewsArticle {
     articleUrl: string,
     imageUrl: string,
     pubTime: string,
-    content: string
+    content: string,
+    saved: boolean,
+    syncTime: number
 }
