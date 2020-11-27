@@ -145,6 +145,7 @@ export class NewsDatabase extends Dexie {
                         headline.push(newArticle);
                     }
                 }
+                this.storeHeadlines(headline);
             } else {
                 for(let j=0; j<dbArticles.length; j++)
                 headline.push(dbArticles[j]);

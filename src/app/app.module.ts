@@ -10,7 +10,9 @@ import { ListComponent } from './components/list.component';
 import { NewsComponent } from './components/news.component';
 import { HomeComponent } from './components/home.component';
 import { NewsDatabase } from './news.database';
-import { WebServices } from './web.service'
+import { WebServices } from './web.service';
+import { ServiceWorkerModule } from '@angular/service-worker';
+import { environment } from '../environments/environment'
 
 const ROUTES: Routes = [
   { path: "", component: HomeComponent },
@@ -34,7 +36,8 @@ const ROUTES: Routes = [
     FormsModule,
     ReactiveFormsModule,
     RouterModule.forRoot(ROUTES),
-    HttpClientModule
+    HttpClientModule,
+    ServiceWorkerModule.register('ngsw-worker.js', { enabled: environment.production })
   ],
   providers: [
     NewsDatabase,
